@@ -110,6 +110,9 @@ if __name__ == "__main__":
     # TEMPORARY REMOVE ME
     output = subprocess.run(['ls', '-la', '/secrets/'], capture_output=True)
     print(output.stdout.decode('utf8') + output.stderr.decode('utf8'))
+    with open('/secrets/github_app_key.pem', 'r') as pem:
+        github_app_key = pem.read()
+        print('Github secret has been read')
 
     integration_docker_wp_version = current_docker_wp_version()
     print('WordPress Integration Docker WP version at {}'.format(integration_docker_wp_version))
