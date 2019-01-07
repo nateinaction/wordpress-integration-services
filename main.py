@@ -118,7 +118,7 @@ if __name__ == "__main__":
         if (is_realease_tar_available(api_wp_version)):
             print('{} release archive is available'.format(api_wp_version))
             # Fetch github secrets
-            with open('/github_app_key.pem', 'r') as pem:
+            with open('/secrets/github_app_key.pem', 'r') as pem:
                 github_app_key = pem.read()
                 print('Github secret has been read')
             

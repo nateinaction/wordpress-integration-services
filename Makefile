@@ -16,4 +16,4 @@ publish:
 	docker push $(IMAGE_NAME)
 
 test_run:
-	$(DOCKER_RUN) -v `pwd`/main.py:/main.py -v `pwd`/github_app_key.pem:/github_app_key.pem $(IMAGE_NAME)
+	$(DOCKER_RUN) -v `pwd`/main.py:/main.py -v `pwd`/github_app_key.pem:/secrets/github_app_key.pem $(IMAGE_NAME)
