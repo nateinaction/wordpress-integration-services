@@ -3,3 +3,5 @@ This docker image runs as a Kubernetes cron job on the [Gaia cluster](https://gi
 When the updated Integration Docker image is published to master, a Travis CI job will build the image and verify it passes tests before pushing to Docker Hub.
 
 The updator in `main.py` is a Github application and expects a private RSA key named `github_app_key.pem` to be mounted at `/secrets/github_app_key.pem`. A K8s secret can be created by running `kubectl create secret generic github-app-key-pem --from-file=./github_app_key.pem`: https://kubernetes.io/docs/concepts/configuration/secret/
+
+This repo's master branch image is automatically built and published by Docker Hub.
