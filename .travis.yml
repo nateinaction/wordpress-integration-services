@@ -1,0 +1,18 @@
+sudo: required
+services: docker
+notifications:
+  email:
+    on_failure: always
+
+branches:
+  only:
+  - master
+
+script:
+  - make docker_build
+
+after_success:
+  - if [[ "${TRAVIS_BRANCH}" == "master" ]]; then
+      docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD};
+      make publish;
+    fi
