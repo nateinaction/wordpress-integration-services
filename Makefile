@@ -1,4 +1,7 @@
+.PHONY: test
+
 IMAGE_NAME := nateinaction/wordpress-integration-updater
+PYTHON_IMAGE := python
 DOCKER_RUN := docker run --rm
 
 all: build_docker lint
@@ -10,7 +13,10 @@ shell:
 	$(DOCKER_RUN) -it -v `pwd`:/app -w /app --entrypoint "/bin/bash" $(IMAGE_NAME)
 
 lint:
-	$(DOCKER_RUN) -it --entrypoint "flake8" $(IMAGE_NAME) /workspace
+	$(DOCKER_RUN) --entrypoint "flake8" $(IMAGE_NAME) /workspace
+
+test:
+	$(DOCKER_RUN) -v `pwd`:/workspace --entrypoint "python" $(IMAGE_NAME) -m unittest discover /workspace
 
 publish:
 	docker push $(IMAGE_NAME)
