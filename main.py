@@ -36,28 +36,28 @@ def is_realease_tar_available(wp_version):
     return (response.status_code == 200)
 
 
-def git_clone(repo_location, branch):
+def git_clone(repo_location, branch, repo_directory=None):
     """Git clone a repo"""
-    output = subprocess.run(['git', 'clone', '-depth', '1', '-branch', branch, repo_location], capture_output=True)
+    output = subprocess.run(['git', 'clone', '--depth', '1', '--branch', branch, repo_location, repo_directory], capture_output=True)
     pretty_out = output.stdout.decode('utf8')
     pretty_err = output.stderr.decode('utf8')
     return pretty_out + pretty_err
 
 
 
-def git_add_commit_and_push(commit_message, branch):
+def git_add_commit_and_push(commit_message, branch, repo_directory=None):
     # git add .
-    output = subprocess.run(['git', 'add', '.'], cwd='wordpress-integration', capture_output=True)
+    output = subprocess.run(['git', 'add', '.'], cwd=repo_directory, capture_output=True)
     pretty_out = output.stdout.decode('utf8')
     pretty_err = output.stderr.decode('utf8')
 
     # git commit -m "..."
-    output = subprocess.run(['git', 'commit', '-m', commit_message], cwd='wordpress-integration', capture_output=True)
+    output = subprocess.run(['git', 'commit', '-m', commit_message], cwd=repo_directory, capture_output=True)
     pretty_out += output.stdout.decode('utf8')
     pretty_err += output.stderr.decode('utf8')
 
     # git push origin master
-    output = subprocess.run(['git', 'push', 'origin', branch], cwd='wordpress-integration', capture_output=True)
+    output = subprocess.run(['git', 'push', 'origin', branch], cwd=repo_directory, capture_output=True)
     pretty_out += output.stdout.decode('utf8')
     pretty_err += output.stderr.decode('utf8')
 
@@ -82,7 +82,9 @@ def update_makefile(new_version, makefile_filename):
 
 def update_dockerfiles():
     output = subprocess.run(['make', 'update_wp_version_all'], cwd='wordpress-integration', capture_output=True)
-    return output.stdout.decode('utf8') + output.stderr.decode('utf8')
+    pretty_out = output.stdout.decode('utf8')
+    pretty_err = output.stderr.decode('utf8')
+    return pretty_out + pretty_err
 
 
 def generate_jwt(app_key):
@@ -123,9 +125,6 @@ if __name__ == "__main__":
         if (is_realease_tar_available(api_wp_version)):
             print('{} release archive is available'.format(api_wp_version))
 
-            # TODO: merge to develop and have another service that merges master on build success
-            branch = 'master'
-
             # Fetch github secrets
             with open('/secrets/github_app_key.pem', 'r') as pem:
                 github_app_key = pem.read()
@@ -139,7 +138,9 @@ if __name__ == "__main__":
 
             # Clone repo
             repo_location = 'https://x-access-token:{}@github.com/nateinaction/wordpress-integration.git'.format(token)
-            output = git_clone(repo_location, branch)
+            branch = 'master'
+            repo_directory = 'wordpress-integration'
+            output = git_clone(repo_location, branch, repo_directory)
             print(output)
 
             # Update Makefile WP version
@@ -152,7 +153,7 @@ if __name__ == "__main__":
 
             # add, commit, and push changes
             commit_message = 'Updating WordPress to {}'.format(api_wp_version)
-            output = git_add_commit_and_push(commit_message, branch)
+            output = git_add_commit_and_push(commit_message, branch, repo_directory)
             print(output)
             exit
         print('Release archive for {} is not yet available'.format(api_wp_version))
