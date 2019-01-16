@@ -48,11 +48,22 @@ def git_clone(repo_location, branch, repo_directory=None):
     return pretty_out + pretty_err
 
 
-def git_push(branch, repo_directory=None):
-    # git push origin master
-    output = subprocess.run(['git', 'push', 'origin', 'HEAD:{}'.format(branch)], cwd=repo_directory, capture_output=True)
+def git_fetch_checkout_and_push(branch, repo_directory=None):
+    # git fetch origin master
+    output = subprocess.run(['git', 'fetch', 'origin', branch], cwd=repo_directory, capture_output=True)
     pretty_out = output.stdout.decode('utf8')
     pretty_err = output.stderr.decode('utf8')
+
+    # git checkout master
+    output = subprocess.run(['git', 'checkout', '-b', branch, 'origin/{}'.format(branch)], cwd=repo_directory, capture_output=True)
+    pretty_out += output.stdout.decode('utf8')
+    pretty_err += output.stderr.decode('utf8')
+    
+    # git push origin master
+    output = subprocess.run(['git', 'push', 'origin', branch], cwd=repo_directory, capture_output=True)
+    pretty_out += output.stdout.decode('utf8')
+    pretty_err += output.stderr.decode('utf8')
+
     return pretty_out + pretty_err
 
 
@@ -113,7 +124,7 @@ if __name__ == "__main__":
             print('Cloned {} branch of {}/{}'.format(DEVELOP_BRANCH, OWNER, REPO))
 
             # Push changes in develop to master
-            output = git_push(PROD_BRANCH, REPO)
+            output = git_fetch_checkout_and_push(PROD_BRANCH, REPO)
             print(output)
             print('Pushed {} branch of {}/{} to {}'.format(DEVELOP_BRANCH, OWNER, REPO, PROD_BRANCH))
         else:
