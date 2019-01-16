@@ -10,14 +10,14 @@ import time
 
 OWNER = 'worldpeaceio'
 REPO = 'wordpress-integration'
-DEVELOP_BRANCH = 'develop'
+DEV_BRANCH = 'develop'
 PROD_BRANCH = 'master'
 
 
-def check_develop_branch_status():
+def check_dev_branch_status():
     """Check develop branch for CI status and most recent commit ID"""
-    develop_branch_status_api = 'https://api.github.com/repos/{}/{}/commits/{}/statuses'.format(OWNER, REPO, DEVELOP_BRANCH)
-    response = requests.get(develop_branch_status_api)
+    dev_branch_status_api = 'https://api.github.com/repos/{}/{}/commits/{}/statuses'.format(OWNER, REPO, DEV_BRANCH)
+    response = requests.get(dev_branch_status_api)
     response_json = response.json()
     most_recent_status = response_json[0]
     status_url = most_recent_status.get('url')
@@ -40,32 +40,19 @@ def get_prod_most_recent_commit_id():
     return response_json[0].get('sha')
 
 
-def git_clone(repo_location, branch, repo_directory=None):
+def git_clone_checkout_and_push(repo_location, prod_branch, dev_branch, repo_directory=None):
     """Git clone a repo"""
-    output = subprocess.run(['git', 'clone', '--depth', '1', '--branch', branch, repo_location, repo_directory], capture_output=True)
-    pretty_out = output.stdout.decode('utf8')
-    pretty_err = output.stderr.decode('utf8')
-    return pretty_out + pretty_err
-
-
-def git_fetch_checkout_and_push(branch, repo_directory=None):
-    # git remote update origin
-    output = subprocess.run(['git', 'remote', 'update', 'origin'], cwd=repo_directory, capture_output=True)
+    output = subprocess.run(['git', 'clone', '--depth', '1', '--branch', prod_branch, repo_location, repo_directory], capture_output=True)
     pretty_out = output.stdout.decode('utf8')
     pretty_err = output.stderr.decode('utf8')
 
-    # git fetch origin master
-    output = subprocess.run(['git', 'fetch', 'origin', branch], cwd=repo_directory, capture_output=True)
+    # git pull origin develop
+    output = subprocess.run(['git', 'pull', 'origin', dev_branch], cwd=repo_directory, capture_output=True)
     pretty_out += output.stdout.decode('utf8')
     pretty_err += output.stderr.decode('utf8')
 
-    # git checkout master
-    output = subprocess.run(['git', 'checkout', '-b', branch, 'origin/{}'.format(branch)], cwd=repo_directory, capture_output=True)
-    pretty_out += output.stdout.decode('utf8')
-    pretty_err += output.stderr.decode('utf8')
-    
     # git push origin master
-    output = subprocess.run(['git', 'push', 'origin', branch], cwd=repo_directory, capture_output=True)
+    output = subprocess.run(['git', 'push', 'origin', prod_branch], cwd=repo_directory, capture_output=True)
     pretty_out += output.stdout.decode('utf8')
     pretty_err += output.stderr.decode('utf8')
 
@@ -99,9 +86,9 @@ if __name__ == "__main__":
     """
     print('WordPress Integration Merge Master starting')
 
-    dev_branch_state, dev_branch_url = check_develop_branch_status()
+    dev_branch_state, dev_branch_url = check_dev_branch_status()
     dev_branch_commit_id = get_commit_id_from_status_url(dev_branch_url)
-    print('{} branch of {}/{} at commit ID {}'.format(DEVELOP_BRANCH, OWNER, REPO, dev_branch_commit_id))
+    print('{} branch of {}/{} at commit ID {}'.format(DEV_BRANCH, OWNER, REPO, dev_branch_commit_id))
 
     prod_branch_commit_id = get_prod_most_recent_commit_id()
     print('{} branch of {}/{} at commit ID {}'.format(PROD_BRANCH, OWNER, REPO, prod_branch_commit_id))
@@ -124,15 +111,10 @@ if __name__ == "__main__":
 
             # Clone repo
             repo_location = 'https://x-access-token:{}@github.com/{}/{}.git'.format(token, OWNER, REPO)
-            output = git_clone(repo_location, DEVELOP_BRANCH, REPO)
+            output = git_clone_checkout_and_push(repo_location, PROD_BRANCH, DEV_BRANCH, REPO)
             print(output)
-            print('Cloned {} branch of {}/{}'.format(DEVELOP_BRANCH, OWNER, REPO))
-
-            # Push changes in develop to master
-            output = git_fetch_checkout_and_push(PROD_BRANCH, REPO)
-            print(output)
-            print('Pushed {} branch of {}/{} to {}'.format(DEVELOP_BRANCH, OWNER, REPO, PROD_BRANCH))
+            print('Cloned {}/{} and pushed {} to {}'.format(OWNER, REPO, DEV_BRANCH, PROD_BRANCH))
         else:
             print('CI status is currently {}'.format(dev_branch_state))
     else:
-        print('{} and {} branches share the same commit ID'.format(DEVELOP_BRANCH, PROD_BRANCH))
+        print('{} and {} branches share the same commit ID'.format(DEV_BRANCH, PROD_BRANCH))
