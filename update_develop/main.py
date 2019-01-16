@@ -8,17 +8,10 @@ import semver
 import subprocess
 import time
 
-MAKEFILE_VERSION_REGEX = r'^WORDPRESS_VERSION := (?P<version>[\d\.]+)'
-
-
-def current_docker_wp_version():
-    """Check Makefile on github for current WP version in integration docker"""
-    wp_version_check_makefile = 'https://raw.githubusercontent.com/nateinaction/wordpress-integration/master/Makefile'
-    response = requests.get(wp_version_check_makefile)
-    for line in response.text.splitlines():
-        wp_version_match = re.match(MAKEFILE_VERSION_REGEX, line)
-        if wp_version_match:
-            return wp_version_match.group(1)
+OWNER = 'worldpeaceio'
+REPO = 'wordpress-integration'
+BRANCH = 'develop'
+MAKEFILE_UPDATER_FILENAME = 'build_helper/update_wp_version_makefile.py'
 
 
 def latest_wp_version():
@@ -44,6 +37,11 @@ def git_clone(repo_location, branch, repo_directory=None):
     return pretty_out + pretty_err
 
 
+def current_docker_wp_version(repo_directory=None):
+    """Check Makefile on github for current WP version in integration docker"""
+    output = subprocess.run(['make', 'get_wp_version_makefile'], cwd=repo_directory, capture_output=True)
+    return output.stdout.decode('utf8')
+
 
 def git_add_commit_and_push(commit_message, branch, repo_directory=None):
     # git add .
@@ -64,24 +62,24 @@ def git_add_commit_and_push(commit_message, branch, repo_directory=None):
     return pretty_out + pretty_err
 
 
-def update_makefile(new_version, makefile_filename):
+def update_makefile(new_version, repo_directory=None):
     """ Set WordPress version in Makefile to the specified version"""
-    print('Setting WordPress version in {} to {}'.format(makefile_filename, new_version))
-
-    with open(makefile_filename, 'r') as f:
-        contents = f.readlines()
-
-    for line_num, line in enumerate(contents):
-        wp_version_match = re.match(MAKEFILE_VERSION_REGEX, line)
-        if wp_version_match:
-            contents[line_num] = 'WORDPRESS_VERSION := {}\n'.format(new_version)
-
-    with open(makefile_filename, 'w') as f:
-        f.writelines(contents)
+    makefile_updater_script = os.path.abspath(MAKEFILE_UPDATER_FILENAME)
+    output = subprocess.run([makefile_updater_script, new_version], cwd=repo_directory, capture_output=True)
+    pretty_out = output.stdout.decode('utf8')
+    pretty_err = output.stderr.decode('utf8')
+    return pretty_out + pretty_err
 
 
-def update_dockerfiles():
-    output = subprocess.run(['make', 'update_wp_version_all'], cwd='wordpress-integration', capture_output=True)
+def update_dockerfiles(repo_directory=None):
+    output = subprocess.run(['make', 'update_wp_version_dockerfile_all'], cwd=repo_directory, capture_output=True)
+    pretty_out = output.stdout.decode('utf8')
+    pretty_err = output.stderr.decode('utf8')
+    return pretty_out + pretty_err
+
+
+def update_readme(repo_directory=None):
+    output = subprocess.run(['make', 'generate_readme'], cwd=repo_directory, capture_output=True)
     pretty_out = output.stdout.decode('utf8')
     pretty_err = output.stderr.decode('utf8')
     return pretty_out + pretty_err
@@ -112,9 +110,27 @@ if __name__ == "__main__":
     """
     Check for release availablility. If a new release is available, clone, modify and push the update to Github.
     """
-    print('WordPress Integration Docker Updater starting')
+    print('WordPress Integration Develop Updater starting')
 
-    integration_docker_wp_version = current_docker_wp_version()
+    # Fetch github secrets
+    with open('/secrets/github_app_key.pem', 'r') as pem:
+        github_app_key = pem.read()
+        print('Github secret has been read')
+    
+    jwt = generate_jwt(github_app_key)
+    print('JWT has been generated')
+
+    token = fetch_github_token(jwt)
+    print('Github token received')
+
+    # Clone repo
+    repo_location = 'https://x-access-token:{}@github.com/{}/{}.git'.format(token, OWNER, REPO)
+    output = git_clone(repo_location, BRANCH, REPO)
+    print(output)
+    print('Cloned {} branch of {}/{} '.format(BRANCH, OWNER, REPO))
+
+    # Check WP versions
+    integration_docker_wp_version = current_docker_wp_version(REPO)
     print('WordPress Integration Docker WP version at {}'.format(integration_docker_wp_version))
 
     api_wp_version = latest_wp_version()
@@ -125,38 +141,25 @@ if __name__ == "__main__":
         if (is_realease_tar_available(api_wp_version)):
             print('{} release archive is available'.format(api_wp_version))
 
-            # Fetch github secrets
-            with open('/secrets/github_app_key.pem', 'r') as pem:
-                github_app_key = pem.read()
-                print('Github secret has been read')
-            
-            jwt = generate_jwt(github_app_key)
-            print('JWT has been generated')
-
-            token = fetch_github_token(jwt)
-            print('Github token received')
-
-            # Clone repo
-            repo_location = 'https://x-access-token:{}@github.com/nateinaction/wordpress-integration.git'.format(token)
-            branch = 'master'
-            repo_directory = 'wordpress-integration'
-            output = git_clone(repo_location, branch, repo_directory)
-            print(output)
-
             # Update Makefile WP version
-            update_makefile(api_wp_version, 'wordpress-integration/Makefile')
-            print('Makefile WP version updated to {}'.format(api_wp_version))
+            output = update_makefile(api_wp_version, REPO)
+            print(output)
 
             # Update WP version in Dockerfiles
-            output = update_dockerfiles()
+            output = update_dockerfiles(REPO)
             print(output)
+
+            # Update README with new tags
+            output = update_readme(REPO)
+            print(output)
+            print('README.md updated')
 
             # add, commit, and push changes
             commit_message = 'Updating WordPress to {}'.format(api_wp_version)
-            output = git_add_commit_and_push(commit_message, branch, repo_directory)
+            output = git_add_commit_and_push(commit_message, BRANCH, REPO)
             print(output)
-            exit
-        print('Release archive for {} is not yet available'.format(api_wp_version))
-        exit
-    print('Currently at {}, no updates are available'.format(integration_docker_wp_version))
-    exit
+            print('Changes have been pushed to the {} branch of {}/{}'.format(BRANCH, OWNER, REPO))
+        else:
+            print('Release archive for {} is not yet available'.format(api_wp_version))
+    else:
+        print('Currently at {}, no updates are available'.format(api_wp_version))
