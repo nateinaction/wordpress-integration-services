@@ -49,10 +49,15 @@ def git_clone(repo_location, branch, repo_directory=None):
 
 
 def git_fetch_checkout_and_push(branch, repo_directory=None):
-    # git fetch origin master
-    output = subprocess.run(['git', 'fetch', 'origin', branch], cwd=repo_directory, capture_output=True)
+    # git remote update origin
+    output = subprocess.run(['git', 'remote', 'update', 'origin'], cwd=repo_directory, capture_output=True)
     pretty_out = output.stdout.decode('utf8')
     pretty_err = output.stderr.decode('utf8')
+
+    # git fetch origin master
+    output = subprocess.run(['git', 'fetch', 'origin', branch], cwd=repo_directory, capture_output=True)
+    pretty_out += output.stdout.decode('utf8')
+    pretty_err += output.stderr.decode('utf8')
 
     # git checkout master
     output = subprocess.run(['git', 'checkout', '-b', branch, 'origin/{}'.format(branch)], cwd=repo_directory, capture_output=True)
