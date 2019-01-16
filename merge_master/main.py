@@ -119,7 +119,7 @@ if __name__ == "__main__":
             print('Cloned {} branch of {}/{}'.format(DEVELOP_BRANCH, OWNER, REPO))
 
             # Push changes in develop to master
-            output = git_push(PROD_BRANCH, REPO)
+            output = git_fetch_and_push(PROD_BRANCH, REPO)
             print(output)
             print('Pushed {} branch of {}/{} to {}'.format(DEVELOP_BRANCH, OWNER, REPO, PROD_BRANCH))
         else:
