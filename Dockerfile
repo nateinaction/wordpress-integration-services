@@ -8,6 +8,6 @@ RUN pip install \
     semver
 
 COPY .gitconfig /root/
-COPY main.py /
-ENTRYPOINT [ "/main.py" ]
+COPY update_develop/main.py /update_develop/main.py
+COPY merge_master/main.py /merge_master/main.py
 WORKDIR /workspace
