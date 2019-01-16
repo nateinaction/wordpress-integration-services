@@ -96,7 +96,7 @@ def generate_jwt(app_key):
 
 
 def fetch_github_token(jwt):
-    github_installation_id = '560500'
+    github_installation_id = '588987'
     url = 'https://api.github.com/app/installations/{}/access_tokens'.format(github_installation_id)
     headers = {
         'Authorization': 'Bearer {}'.format(jwt.decode('utf8')),
