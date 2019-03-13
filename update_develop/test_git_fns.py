@@ -4,6 +4,7 @@ import subprocess
 import tempfile
 import unittest
 
+
 class TestGitFns(unittest.TestCase):
     def setUp(self):
         self.bare_repo_dir = tempfile.mkdtemp()

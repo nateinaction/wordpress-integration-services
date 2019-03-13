@@ -106,6 +106,11 @@ def fetch_github_token(jwt):
     return response.json().get('token')
 
 
+def normalize_semver(version):
+    """Fix WordPress minor 0 releases that don't adhear to semver"""
+    return version if version.count('.') == 2 else '{}.0'.format(version)
+
+
 if __name__ == "__main__":
     """
     Check for release availablility. If a new release is available, clone, modify and push the update to Github.
@@ -136,7 +141,10 @@ if __name__ == "__main__":
     api_wp_version = latest_wp_version()
     print('Latest API WP version at {}'.format(api_wp_version))
 
-    if (semver.compare(api_wp_version, integration_docker_wp_version) > 0):
+    # Ensure versions follow semver
+    normalized_api_wp_version = normalize_semver(api_wp_version)
+    normalized_integration_docker_wp_version = normalize_semver(integration_docker_wp_version)
+    if (semver.compare(normalized_api_wp_version, normalized_integration_docker_wp_version) > 0):
         print('An update from {} to {} is available'.format(integration_docker_wp_version, api_wp_version))
         if (is_realease_tar_available(api_wp_version)):
             print('{} release archive is available'.format(api_wp_version))
