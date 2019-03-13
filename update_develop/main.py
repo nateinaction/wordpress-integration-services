@@ -11,7 +11,6 @@ import time
 OWNER = 'worldpeaceio'
 REPO = 'wordpress-integration'
 BRANCH = 'develop'
-MAKEFILE_UPDATER_FILENAME = 'build_helper/update_wp_version_makefile.py'
 
 
 def latest_wp_version():
@@ -40,7 +39,7 @@ def git_clone(repo_location, branch, repo_directory=None):
 def current_docker_wp_version(repo_directory=None):
     """Check Makefile on github for current WP version in integration docker"""
     output = subprocess.run(['make', 'get_wp_version_makefile'], cwd=repo_directory, capture_output=True)
-    return output.stdout.decode('utf8')
+    return output.stdout.decode('utf8').strip()
 
 
 def git_add_commit_and_push(commit_message, branch, repo_directory=None):
@@ -64,8 +63,11 @@ def git_add_commit_and_push(commit_message, branch, repo_directory=None):
 
 def update_makefile(new_version, repo_directory=None):
     """ Set WordPress version in Makefile to the specified version"""
-    makefile_updater_script = os.path.abspath(MAKEFILE_UPDATER_FILENAME)
-    output = subprocess.run([makefile_updater_script, new_version], cwd=repo_directory, capture_output=True)
+    output = subprocess.run(
+        ['make', 'update_wp_version_makefile', 'version="{}"'.format(new_version)],
+        cwd=repo_directory,
+        capture_output=True
+    )
     pretty_out = output.stdout.decode('utf8')
     pretty_err = output.stderr.decode('utf8')
     return pretty_out + pretty_err
@@ -142,11 +144,11 @@ if __name__ == "__main__":
     print('Latest API WP version at {}'.format(api_wp_version))
 
     # Ensure versions follow semver
-    normalized_api_wp_version = normalize_semver(api_wp_version)
-    normalized_integration_docker_wp_version = normalize_semver(integration_docker_wp_version)
-    if (semver.compare(normalized_api_wp_version, normalized_integration_docker_wp_version) > 0):
+    api_wp_semver = normalize_semver(api_wp_version)
+    integration_docker_wp_semver = normalize_semver(integration_docker_wp_version)
+    if semver.compare(api_wp_semver, integration_docker_wp_semver) > 0:
         print('An update from {} to {} is available'.format(integration_docker_wp_version, api_wp_version))
-        if (is_realease_tar_available(api_wp_version)):
+        if is_realease_tar_available(api_wp_version):
             print('{} release archive is available'.format(api_wp_version))
 
             # Update Makefile WP version
