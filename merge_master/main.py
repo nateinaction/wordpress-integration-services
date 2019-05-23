@@ -16,21 +16,13 @@ PROD_BRANCH = 'master'
 
 def check_dev_branch_status():
     """Check develop branch for CI status and most recent commit ID"""
-    dev_branch_status_api = 'https://api.github.com/repos/{}/{}/commits/{}/statuses'.format(OWNER, REPO, DEV_BRANCH)
-    response = requests.get(dev_branch_status_api)
+    # This endpoint is still in beta so we need to pass a header
+    headers = {'Accept': 'application/vnd.github.antiope-preview+json'}
+    dev_branch_status_api = 'https://api.github.com/repos/{}/{}/commits/{}/check-runs'.format(OWNER, REPO, DEV_BRANCH)
+    response = requests.get(dev_branch_status_api, headers=headers)
     response_json = response.json()
-    most_recent_status = response_json[0]
-    status_url = most_recent_status.get('url')
-    status_state = most_recent_status.get('state')
-    return status_state, status_url
-
-
-def get_commit_id_from_status_url(url):
-    """
-    Gets commit ID from a URL like
-    https://api.github.com/repos/worldpeaceio/wordpress-integration/statuses/45ac8810372444b0b0cb8111d2d43a7479541fbd
-    """
-    return url.split('/')[-1]
+    run_status = response_json.get('check_runs')[0]
+    return run_status['conclusion'], run_status['head_sha']
 
 
 def get_prod_most_recent_commit_id():
@@ -86,8 +78,7 @@ if __name__ == "__main__":
     """
     print('WordPress Integration Merge Master starting')
 
-    dev_branch_state, dev_branch_url = check_dev_branch_status()
-    dev_branch_commit_id = get_commit_id_from_status_url(dev_branch_url)
+    dev_branch_state, dev_branch_commit_id = check_dev_branch_status()
     print('{} branch of {}/{} at commit ID {}'.format(DEV_BRANCH, OWNER, REPO, dev_branch_commit_id))
 
     prod_branch_commit_id = get_prod_most_recent_commit_id()
