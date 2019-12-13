@@ -73,8 +73,8 @@ def update_makefile(new_version, repo_directory=None):
     return pretty_out + pretty_err
 
 
-def update_dockerfiles(repo_directory=None):
-    output = subprocess.run(['make', 'update_wp_version_dockerfile_all'], cwd=repo_directory, capture_output=True)
+def update_dockerfile(repo_directory=None):
+    output = subprocess.run(['make', 'update_wp_version_dockerfile'], cwd=repo_directory, capture_output=True)
     pretty_out = output.stdout.decode('utf8')
     pretty_err = output.stderr.decode('utf8')
     return pretty_out + pretty_err
@@ -155,8 +155,8 @@ if __name__ == "__main__":
             output = update_makefile(api_wp_version, REPO)
             print(output)
 
-            # Update WP version in Dockerfiles
-            output = update_dockerfiles(REPO)
+            # Update WP version in the Dockerfile
+            output = update_dockerfile(REPO)
             print(output)
 
             # Update README with new tags
