@@ -9,3 +9,10 @@ deploy:
   kubectl:
     manifests:
       - deploy/*
+profiles:
+  - name: local
+    deploy:
+      kubeContext: docker-for-desktop
+  - name: prod
+    deploy:
+      kubeContext: gke_api-in-k8s_us-central1-a_gaia

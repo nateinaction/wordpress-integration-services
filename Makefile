@@ -7,8 +7,8 @@ build:
 
 .PHONY: dev
 dev:
-	skaffold dev
+	skaffold dev --no-prune=false -p local
 
 .PHONY: deploy
 deploy:
-	skaffold run
+	skaffold run -p prod

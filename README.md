@@ -12,19 +12,15 @@ This docker image runs as a [Kubernetes cron job](https://kubernetes.io/docs/con
 The updater in `main.py` is a Github application and expects a private RSA key named `github_app_key.pem` to be mounted at `/secrets/github_app_key.pem`. A [K8s secret](https://kubernetes.io/docs/concepts/configuration/secret/) can be created by running `kubectl create secret generic github-app-key-pem --from-file=./github_app_key.pem`.
 
 ### Developing
-If you have a local cluster running you can create a hot reloading development environment by running `skaffold run`
+If you have a local cluster running you can create a hot reloading development environment by running `make dev`
 
 ### How to deploy
+Skaffold builds a tagged image, publishes it to Docker Hub and then updates the k8s cron spec.
 
-#### Changes to the docker image
-The docker image is built and published by Docker Hub's CI pipeline on merge to master. The next time the k8s cron runs it will pull the latest image from Docker Hub.
-
-#### Changes to the k8s cron spec
-To apply a new cron spec:
 ```
 gcloud auth login
 gcloud components install kubectl
 gcloud container clusters get-credentials gaia --zone us-central1-a --project api-in-k8s
-skaffold run
+make deploy
 kubectl get cronjob
 ```
