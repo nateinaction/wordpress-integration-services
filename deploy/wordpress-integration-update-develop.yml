@@ -1,0 +1,25 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: wordpress-integration-update-develop
+spec:
+  schedule: "24 */3 * * *"
+  concurrencyPolicy: Replace
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: wordpress-integration-update-develop
+            image: worldpeaceio/wordpress-integration-services
+            command: ["python"]
+            args: ["/update_develop/main.py"]
+            volumeMounts:
+            - name: "secrets"
+              mountPath: "/secrets"
+              readOnly: true
+          volumes:
+          - name: secrets
+            secret:
+              secretName: github-app-key-pem
+          restartPolicy: OnFailure

@@ -1,0 +1,25 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: wordpress-integration-merge-master
+spec:
+  schedule: "*/30 * * * *"
+  concurrencyPolicy: Replace
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: wordpress-integration-merge-master
+            image: worldpeaceio/wordpress-integration-services
+            command: ["python"]
+            args: ["/merge_master/main.py"]
+            volumeMounts:
+            - name: "secrets"
+              mountPath: "/secrets"
+              readOnly: true
+          volumes:
+          - name: secrets
+            secret:
+              secretName: github-app-key-pem
+          restartPolicy: OnFailure
