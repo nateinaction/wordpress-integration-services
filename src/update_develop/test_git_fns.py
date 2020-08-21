@@ -28,7 +28,7 @@ class TestGitFns(unittest.TestCase):
         subprocess.run(['git', 'checkout', '-b', self.branch], cwd=self.original_repo_dir, capture_output=True)
         # Push to bare repo
         subprocess.run(['git', 'push', 'origin', self.branch], cwd=self.original_repo_dir, capture_output=True)
-    
+
     def tearDown(self):
         shutil.rmtree(self.bare_repo_dir, ignore_errors=True)
         shutil.rmtree(self.original_repo_dir, ignore_errors=True)
@@ -38,7 +38,7 @@ class TestGitFns(unittest.TestCase):
         # Verify test file is setup correctly
         cat_test_txt = subprocess.run(['cat', self.test_file], cwd=self.original_repo_dir, capture_output=True)
         self.assertEqual(cat_test_txt.stdout.decode('utf8'), 'Hello world!')
-        
+
         # Verify cloned repo only has develop branch
         main.git_clone(self.bare_repo_file_url, self.branch, self.cloned_repo_dir)
         check_cloned_branch = subprocess.run(['git', 'branch'], cwd=self.cloned_repo_dir, capture_output=True)

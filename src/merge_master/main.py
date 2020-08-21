@@ -1,10 +1,7 @@
 #!/usr/bin/env python
 
 import jwt
-import os
-import re
 import requests
-import semver
 import subprocess
 import time
 
@@ -34,7 +31,8 @@ def get_prod_most_recent_commit_id():
 
 def git_clone_checkout_and_push(repo_location, prod_branch, dev_branch, repo_directory=None):
     """Git clone a repo"""
-    output = subprocess.run(['git', 'clone', '--depth', '1', '--branch', prod_branch, repo_location, repo_directory], capture_output=True)
+    output = subprocess.run(['git', 'clone', '--depth', '1', '--branch', prod_branch, repo_location, repo_directory],
+                            capture_output=True)
     pretty_out = output.stdout.decode('utf8')
     pretty_err = output.stderr.decode('utf8')
 
@@ -93,11 +91,11 @@ if __name__ == "__main__":
             with open('/secrets/github_app_key.pem', 'r') as pem:
                 github_app_key = pem.read()
                 print('Github secret has been read')
-            
-            jwt = generate_jwt(github_app_key)
+
+            generated_jwt = generate_jwt(github_app_key)
             print('JWT has been generated')
 
-            token = fetch_github_token(jwt)
+            token = fetch_github_token(generated_jwt)
             print('Github token received')
 
             # Clone repo

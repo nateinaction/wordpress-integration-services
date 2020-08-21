@@ -12,5 +12,6 @@ class TestUpdateDevelop(unittest.TestCase):
         expect = '5.0.1'
         self.assertEqual(main.normalize_semver(version), expect)
 
+
 if __name__ == '__main__':
     unittest.main()

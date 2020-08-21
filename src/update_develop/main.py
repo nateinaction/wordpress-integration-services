@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 
 import jwt
-import os
-import re
 import requests
 import semver
 import subprocess
@@ -30,7 +28,8 @@ def is_realease_tar_available(wp_version):
 
 def git_clone(repo_location, branch, repo_directory=None):
     """Git clone a repo"""
-    output = subprocess.run(['git', 'clone', '--depth', '1', '--branch', branch, repo_location, repo_directory], capture_output=True)
+    output = subprocess.run(['git', 'clone', '--depth', '1', '--branch', branch, repo_location, repo_directory],
+                            capture_output=True)
     pretty_out = output.stdout.decode('utf8')
     pretty_err = output.stderr.decode('utf8')
     return pretty_out + pretty_err
@@ -97,11 +96,11 @@ def generate_jwt(app_key):
     return jwt.encode(payload, app_key, algorithm='RS256')
 
 
-def fetch_github_token(jwt):
+def fetch_github_token(github_jwt):
     github_installation_id = '588987'
     url = 'https://api.github.com/app/installations/{}/access_tokens'.format(github_installation_id)
     headers = {
-        'Authorization': 'Bearer {}'.format(jwt.decode('utf8')),
+        'Authorization': 'Bearer {}'.format(github_jwt.decode('utf8')),
         'Accept': 'application/vnd.github.machine-man-preview+json',
     }
     response = requests.post(url, headers=headers)
@@ -123,11 +122,11 @@ if __name__ == "__main__":
     with open('/secrets/github_app_key.pem', 'r') as pem:
         github_app_key = pem.read()
         print('Github secret has been read')
-    
-    jwt = generate_jwt(github_app_key)
+
+    generated_jwt = generate_jwt(github_app_key)
     print('JWT has been generated')
 
-    token = fetch_github_token(jwt)
+    token = fetch_github_token(generated_jwt)
     print('Github token received')
 
     # Clone repo

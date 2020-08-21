@@ -1,0 +1,11 @@
+apiVersion: skaffold/v2beta6
+kind: Config
+metadata:
+  name: wordpress-integration-services
+build:
+  artifacts:
+  - image: worldpeaceio/wordpress-integration-services
+deploy:
+  kubectl:
+    manifests:
+      - deploy/*

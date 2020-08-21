@@ -13,7 +13,7 @@ spec:
           - name: wordpress-integration-update-develop
             image: worldpeaceio/wordpress-integration-services
             command: ["python"]
-            args: ["/update_develop/main.py"]
+            args: ["/app/update_develop/main.py"]
             volumeMounts:
             - name: "secrets"
               mountPath: "/secrets"
