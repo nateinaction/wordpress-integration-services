@@ -4,7 +4,7 @@ metadata:
   name: wordpress-integration-services
 build:
   artifacts:
-  - image: worldpeaceio/wordpress-integration-services
+  - image: us.gcr.io/api-in-k8s/wordpress-integration-services
 deploy:
   kubectl:
     manifests:
