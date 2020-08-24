@@ -2,6 +2,8 @@ apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
   name: wordpress-integration-merge-master
+  labels:
+    app: wordpress-integration-services
 spec:
   schedule: "*/30 * * * *"
   concurrencyPolicy: Replace
@@ -10,8 +12,8 @@ spec:
       template:
         spec:
           containers:
-          - name: wordpress-integration-merge-master
-            image: worldpeaceio/wordpress-integration-services
+          - name: wordpress-integration-services
+            image: us.gcr.io/api-in-k8s/wordpress-integration-services
             command: ["python"]
             args: ["/app/merge_master/main.py"]
             volumeMounts:

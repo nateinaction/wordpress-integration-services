@@ -7,7 +7,7 @@ build:
 
 .PHONY: dev
 dev:
-	skaffold dev --no-prune=false -p local
+	skaffold dev --no-prune=false
 
 .PHONY: deploy
 deploy:

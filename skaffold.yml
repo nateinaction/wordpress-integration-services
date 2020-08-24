@@ -6,13 +6,14 @@ build:
   artifacts:
   - image: us.gcr.io/api-in-k8s/wordpress-integration-services
 deploy:
-  kubectl:
-    manifests:
-      - deploy/*
+  kustomize:
+    paths:
+    - deploy/local
+  kubeContext: docker-for-desktop
 profiles:
-  - name: local
-    deploy:
-      kubeContext: docker-for-desktop
   - name: prod
     deploy:
+      kustomize:
+        paths:
+        - deploy/prod
       kubeContext: gke_api-in-k8s_us-central1-a_gaia
