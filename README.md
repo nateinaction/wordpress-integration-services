@@ -8,6 +8,7 @@ This docker image runs as a [Kubernetes cron job](https://kubernetes.io/docs/con
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
 - [skaffold](https://skaffold.dev)
 - [kustomize](https://kustomize.io)
+- [kpt](https://googlecontainertools.github.io/kpt/)
 
 #### Secrets
 The updater in `main.py` is a Github application and expects a private RSA key named `github_app_key.pem` to be mounted at `/secrets/github_app_key.pem`. A [K8s secret](https://kubernetes.io/docs/concepts/configuration/secret/) can be created by running `kubectl create secret generic github-app-key-pem --from-file=./github_app_key.pem`.

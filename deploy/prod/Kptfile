@@ -1,0 +1,8 @@
+apiVersion: kpt.dev/v1alpha1
+kind: Kptfile
+metadata:
+  name: wordpress-integration-services-prod
+packageMetadata:
+  tags:
+  - kpt.dev/app=wordpress-integration-services-prod
+  shortDescription: kpt wordpress-integration-services package-prod
