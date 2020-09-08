@@ -1,0 +1,73 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  creationTimestamp: null
+  labels:
+    app: wordpress-integration-services
+  name: wordpress-integration-merge-master
+spec:
+  concurrencyPolicy: Replace
+  jobTemplate:
+    metadata:
+      creationTimestamp: null
+    spec:
+      template:
+        metadata:
+          creationTimestamp: null
+        spec:
+          containers:
+          - args:
+            - /app/merge_master/main.py
+            command:
+            - python
+            image: wordpress-integration-services:1a43dcb63f96
+            name: wordpress-integration-services
+            resources: {}
+            volumeMounts:
+            - mountPath: /secrets
+              name: secrets
+              readOnly: true
+          restartPolicy: OnFailure
+          volumes:
+          - name: secrets
+            secret:
+              secretName: github-app-key-pem
+  schedule: '*/30 * * * *'
+status: {}
+---
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  creationTimestamp: null
+  labels:
+    app: wordpress-integration-services
+  name: wordpress-integration-update-develop
+spec:
+  concurrencyPolicy: Replace
+  jobTemplate:
+    metadata:
+      creationTimestamp: null
+    spec:
+      template:
+        metadata:
+          creationTimestamp: null
+        spec:
+          containers:
+          - args:
+            - /app/update_develop/main.py
+            command:
+            - python
+            image: wordpress-integration-services:1a43dcb63f96
+            name: wordpress-integration-services
+            resources: {}
+            volumeMounts:
+            - mountPath: /secrets
+              name: secrets
+              readOnly: true
+          restartPolicy: OnFailure
+          volumes:
+          - name: secrets
+            secret:
+              secretName: github-app-key-pem
+  schedule: 24 */3 * * *
+status: {}

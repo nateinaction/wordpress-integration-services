@@ -6,13 +6,14 @@ This docker image runs as a [Kubernetes cron job](https://kubernetes.io/docs/con
 - [docker](https://docs.docker.com/get-docker/)
 - [gcloud](https://cloud.google.com/sdk/install)
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
-- [kustomize](https://kustomize.io)
 
 #### Secrets
 The updater in `main.py` is a Github application and expects a private RSA key named `github_app_key.pem` to be mounted at `/secrets/github_app_key.pem`. A [K8s secret](https://kubernetes.io/docs/concepts/configuration/secret/) can be created by running `kubectl create secret generic github-app-key-pem --from-file=./github_app_key.pem`.
 
 ### Developing
 If you have a local cluster running you can create a hot reloading development environment by running `make build deploy`
+
+You can clean up your local environment by running `make tear_down`
 
 ### How to deploy
 Build a tagged image, publish to the Google Container Registry and then updates the k8s cron spec.

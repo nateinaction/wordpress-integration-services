@@ -1,0 +1,21 @@
+steps:
+- name: 'gcr.io/cloud-builders/gke-deploy'
+  args:
+  - run
+  - --filename=artifacts/wordpress-integration-services.yaml
+  - --location=us-central1-a
+  - --cluster=gaia
+timeout: 30s
+# - name: 'gcr.io/cloud-builders/docker'
+#     entrypoint: 'bash'
+#     args: ['make', '']
+#     timeout: 500s
+# - name: 'gcr.io/cloud-builders/docker'
+#     args: ['push', 'gcr.io/my-project/my-image']
+# - name: 'gcr.io/cloud-builders/kubectl'
+#     args: ['set', 'image', 'deployment/my-deployment', 'my-container=gcr.io/my-project/my-image']
+#     env:
+#     - 'CLOUDSDK_COMPUTE_ZONE=us-east4-b'
+#     - 'CLOUDSDK_CONTAINER_CLUSTER=my-cluster'
+# artifacts: ['wordpress-integration-services.yaml']
+# images: ['us.gcr.io/api-in-k8s/wordpress-integration-services']

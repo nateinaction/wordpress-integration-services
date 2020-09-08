@@ -1,5 +1,4 @@
 .env
 .idea/
-artifacts/
 deploy/
 venv/
