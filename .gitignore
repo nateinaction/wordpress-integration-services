@@ -1,3 +1,5 @@
 .env
 github_app_key.pem
+/kustomization.yaml
+artifacts/
 venv/

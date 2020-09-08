@@ -1,8 +1,0 @@
-apiVersion: kpt.dev/v1alpha1
-kind: Kptfile
-metadata:
-  name: wordpress-integration-services-local
-packageMetadata:
-  tags:
-  - kpt.dev/app=wordpress-integration-services-local
-  shortDescription: kpt wordpress-integration-services local package

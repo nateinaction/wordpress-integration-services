@@ -1,6 +1,0 @@
-apiVersion: batch/v1beta1
-kind: CronJob
-metadata:
-  name: wordpress-integration-update-develop
-  labels:
-    env: prod

@@ -2,8 +2,6 @@ apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
   name: wordpress-integration-merge-master
-  labels:
-    app: wordpress-integration-services
 spec:
   schedule: "*/30 * * * *"
   concurrencyPolicy: Replace

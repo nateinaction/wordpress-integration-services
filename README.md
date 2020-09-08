@@ -6,24 +6,22 @@ This docker image runs as a [Kubernetes cron job](https://kubernetes.io/docs/con
 - [docker](https://docs.docker.com/get-docker/)
 - [gcloud](https://cloud.google.com/sdk/install)
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
-- [skaffold](https://skaffold.dev)
 - [kustomize](https://kustomize.io)
-- [kpt](https://googlecontainertools.github.io/kpt/)
 
 #### Secrets
 The updater in `main.py` is a Github application and expects a private RSA key named `github_app_key.pem` to be mounted at `/secrets/github_app_key.pem`. A [K8s secret](https://kubernetes.io/docs/concepts/configuration/secret/) can be created by running `kubectl create secret generic github-app-key-pem --from-file=./github_app_key.pem`.
 
 ### Developing
-If you have a local cluster running you can create a hot reloading development environment by running `make dev`
+If you have a local cluster running you can create a hot reloading development environment by running `make build deploy`
 
 ### How to deploy
-Skaffold builds a tagged image, publishes it to the Google Container Registry and then updates the k8s cron spec.
+Build a tagged image, publish to the Google Container Registry and then updates the k8s cron spec.
 
 ```
 gcloud auth login
 gcloud components install kubectl
 gcloud container clusters get-credentials gaia --zone us-central1-a --project api-in-k8s
 gcloud auth configure-docker
-make deploy
-kubectl get cronjob
+make prod
+kubectl get cronjobs
 ```
