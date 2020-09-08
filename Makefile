@@ -1,4 +1,4 @@
-LOCAL_CTX := docker-for-desktop
+K8S_CTX ?= docker-for-desktop
 PROD_CTX := gke_api-in-k8s_us-central1-a_gaia
 PROD_IMAGE_REGISTRY := us.gcr.io/api-in-k8s/
 
@@ -32,20 +32,16 @@ docker_push:
 
 .PHONY: deploy
 deploy:
-	kubectx $(LOCAL_CTX)
+	kubectx $(K8S_CTX)
 	kubectl apply -f $(ARTIFACTS_DIR)/$(IMAGE_NAME).yaml
 
 .PHONY: tear_down
 tear_down:
-	kubectx $(LOCAL_CTX)
+	kubectx $(K8S_CTX)
 	kubectl delete -f $(ARTIFACTS_DIR)/$(IMAGE_NAME).yaml
 
 # Prod
 .PHONY: prod
+prod: K8S_CTX=$(PROD_CTX)
 prod: IMAGE_REGISTRY=$(PROD_IMAGE_REGISTRY)
-prod: build docker_push deploy_prod
-
-.PHONY: deploy_prod
-deploy_prod:
-	kubectx $(PROD_CTX)
-	kubectl apply -f $(ARTIFACTS_DIR)/$(IMAGE_NAME).yaml
+prod: build docker_push deploy
