@@ -17,7 +17,7 @@ You can clean up your local environment by running `make tear_down`
 
 ### How to deploy
 Build a tagged image, publish to the Google Container Registry and then updates the k8s cron spec.
-
+ 
 ```
 gcloud auth login
 gcloud components install kubectl
