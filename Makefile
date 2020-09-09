@@ -1,12 +1,9 @@
-K8S_CTX ?= docker-for-desktop
-PROD_CTX := gke_api-in-k8s_us-central1-a_gaia
-PROD_IMAGE_REGISTRY := us.gcr.io/api-in-k8s/
-
 IMAGE_NAME := wordpress-integration-services
-INITIAL_TAG ?= $(shell date | shasum -a 256 | cut -d' ' -f1)
+INITIAL_TAG := $(shell date | sha256sum | head -c 8)
 IMAGE_TAG = $(shell docker images $(IMAGE_NAME):$(INITIAL_TAG) --format '{{.ID}}')
 
 ARTIFACTS_DIR := artifacts
+LOCAL_K8S_CTX := docker-for-desktop
 K8S_CONFIG := $(ARTIFACTS_DIR)/$(IMAGE_NAME).yaml
 CLOUD_BUILD_PKG := $(ARTIFACTS_DIR)/$(IMAGE_NAME).tar.gz
 
@@ -36,30 +33,12 @@ mkdir:
 k8s_config: mkdir
 	kubectl set image -f deploy $(IMAGE_NAME)=$(IMAGE_REGISTRY)$(IMAGE_NAME):$(IMAGE_TAG) --local -o yaml > $(K8S_CONFIG)
 
-.PHONY: cloud_build
-cloud_build: clean mkdir
-	tar --exclude='$(ARTIFACTS_DIR)' -czvf $(CLOUD_BUILD_PKG) .
-	gcloud builds submit $(CLOUD_BUILD_PKG)
-
 .PHONY: deploy
 deploy:
-	kubectx $(K8S_CTX)
+	kubectx $(LOCAL_K8S_CTX)
 	kubectl apply -f $(K8S_CONFIG)
 
 .PHONY: tear_down
 tear_down:
-	kubectx $(K8S_CTX)
+	kubectx $(LOCAL_K8S_CTX)
 	kubectl delete -f $(K8S_CONFIG)
-
-.PHONY: clean
-clean:
-	rm -f .env
-	rm -f github_app_key.pem
-	rm -rf $(ARTIFACTS_DIR)
-	rm -rf venv/
-
-# Prod
-.PHONY: prod
-prod: K8S_CTX=$(PROD_CTX)
-prod: IMAGE_REGISTRY=$(PROD_IMAGE_REGISTRY)
-prod: build docker_push cloud_build

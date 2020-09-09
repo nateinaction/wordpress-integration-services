@@ -1,24 +1,13 @@
 steps:
-# Setup
-- name: 'bash'
-  args: ['make', 'mkdir']
+# Build and push the build image
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['build', '-t', 'docker-make', 'build']
 
 # Build docker images
-- name: 'gcr.io/cloud-builders/docker'
-  entrypoint: 'bash'
-  args: ['make', 'docker']
+- name: 'docker-make'
+  args: ['build', 'docker_push']
   env:
-  - 'IMAGE_REGISTRY=${_IMAGE_REGISTRY}'
-  - 'IMAGE_NAME=${_IMAGE_NAME}'
-  - 'INITIAL_TAG=${_INITIAL_TAG}'
-
-# Build k8s config
-- name: 'gcr.io/cloud-builders/kubectl'
-  args: ['make', 'k8s-config']
-  env:
-  - 'IMAGE_REGISTRY=${_IMAGE_REGISTRY}'
-  - 'IMAGE_NAME=${_IMAGE_NAME}'
-  - 'INITIAL_TAG=${_INITIAL_TAG}'
+  - 'IMAGE_REGISTRY=us.gcr.io/${PROJECT_ID}/'
 
 # Deploy to k8s cluster
 - name: 'gcr.io/cloud-builders/gke-deploy'
@@ -31,9 +20,7 @@ steps:
 
 # Options
 timeout: 300s
-substitutions:
-  _IMAGE_REGISTRY: undefined
-  _IMAGE_NAME: undefined
-  _INITIAL_TAG: undefined
-images: ['${_IMAGE_REGISTRY}${_IMAGE_NAME}:${_INITIAL_TAG}']
-artifacts: ['artifacts/wordpress-integration-services.yaml']
+artifacts:
+  objects:
+    location: 'gs://${PROJECT_ID}_cloudbuild/${REPO_NAME}/${BRANCH_NAME}/${SHORT_SHA}-${BUILD_ID}'
+    paths: ['artifacts/wordpress-integration-services.yaml']
