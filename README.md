@@ -16,13 +16,12 @@ If you have a local cluster running you can create a hot reloading development e
 You can clean up your local environment by running `make tear_down`
 
 ### How to deploy
-Build a tagged image, publish to the Google Container Registry and then updates the k8s cron spec.
- 
+Just merge to master. Google Cloud Build handles building and tagging the image, publishing it to the Google Container Registry and then deploying an updated spec to the cluster.
+
+### How to check on the status of a deploy
 ```
 gcloud auth login
 gcloud components install kubectl
 gcloud container clusters get-credentials gaia --zone us-central1-a --project api-in-k8s
-gcloud auth configure-docker
-make prod
 kubectl get cronjobs
 ```
