@@ -1,21 +1,39 @@
 steps:
+# Setup
+- name: 'bash'
+  args: ['make', 'mkdir']
+
+# Build docker images
+- name: 'gcr.io/cloud-builders/docker'
+  entrypoint: 'bash'
+  args: ['make', 'docker']
+  env:
+  - 'IMAGE_REGISTRY=${_IMAGE_REGISTRY}'
+  - 'IMAGE_NAME=${_IMAGE_NAME}'
+  - 'INITIAL_TAG=${_INITIAL_TAG}'
+
+# Build k8s config
+- name: 'gcr.io/cloud-builders/kubectl'
+  args: ['make', 'k8s-config']
+  env:
+  - 'IMAGE_REGISTRY=${_IMAGE_REGISTRY}'
+  - 'IMAGE_NAME=${_IMAGE_NAME}'
+  - 'INITIAL_TAG=${_INITIAL_TAG}'
+
+# Deploy to k8s cluster
 - name: 'gcr.io/cloud-builders/gke-deploy'
   args:
   - run
   - --filename=artifacts/wordpress-integration-services.yaml
   - --location=us-central1-a
   - --cluster=gaia
-timeout: 30s
-# - name: 'gcr.io/cloud-builders/docker'
-#     entrypoint: 'bash'
-#     args: ['make', '']
-#     timeout: 500s
-# - name: 'gcr.io/cloud-builders/docker'
-#     args: ['push', 'gcr.io/my-project/my-image']
-# - name: 'gcr.io/cloud-builders/kubectl'
-#     args: ['set', 'image', 'deployment/my-deployment', 'my-container=gcr.io/my-project/my-image']
-#     env:
-#     - 'CLOUDSDK_COMPUTE_ZONE=us-east4-b'
-#     - 'CLOUDSDK_CONTAINER_CLUSTER=my-cluster'
-# artifacts: ['wordpress-integration-services.yaml']
-# images: ['us.gcr.io/api-in-k8s/wordpress-integration-services']
+  - --namespace=default
+
+# Options
+timeout: 300s
+substitutions:
+  _IMAGE_REGISTRY: undefined
+  _IMAGE_NAME: undefined
+  _INITIAL_TAG: undefined
+images: ['${_IMAGE_REGISTRY}${_IMAGE_NAME}:${_INITIAL_TAG}']
+artifacts: ['artifacts/wordpress-integration-services.yaml']

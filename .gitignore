@@ -1,4 +1,4 @@
 .env
 github_app_key.pem
-/wordpress-integration-services.yaml
+/artifacts
 venv/
