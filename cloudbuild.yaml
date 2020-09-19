@@ -24,5 +24,5 @@ steps:
 timeout: 300s
 artifacts:
   objects:
-    location: 'gs://${PROJECT_ID}_cloudbuild/${REPO_NAME}/${BRANCH_NAME}/${SHORT_SHA}-${BUILD_ID}'
+    location: 'gs://${PROJECT_ID}_cloud_build_artifacts/${REPO_NAME}/${BRANCH_NAME}/${SHORT_SHA}-${BUILD_ID}'
     paths: ['artifacts/wordpress-integration-services.yaml']
