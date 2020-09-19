@@ -3,20 +3,21 @@ steps:
 - name: 'gcr.io/cloud-builders/docker'
   args: ['build', '-t', 'docker-make', 'build']
 
-# Build the docker images and the k8s artifact, push the images
+# Build the k8s config
 - name: 'docker-make'
-  args: ['build', 'docker_push']
-  env:
-  - 'IMAGE_REGISTRY=us.gcr.io/${PROJECT_ID}/'
+  args: ['kustomization.yaml']
+
+# Publish images
+- name: 'docker-make'
+  args: ['docker_push']
 
 # Deploy to k8s cluster
-- name: 'gcr.io/cloud-builders/gke-deploy'
+- name: 'docker-make'
   args:
-  - run
-  - --filename=artifacts/wordpress-integration-services.yaml
-  - --location=us-central1-a
-  - --cluster=gaia
-  - --namespace=default
+    - '-c'
+    - |
+      gcloud container clusters get-credentials --zone us-central1-a wandering-frog
+      KUBECTX="gke_worldpeace-production_us-central1-a_wandering-frog" make deploy
 
 # Options
 timeout: 300s
