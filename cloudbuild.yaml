@@ -18,7 +18,7 @@ steps:
     - '-c'
     - |
       gcloud container clusters get-credentials --zone us-central1-a wandering-frog
-      KUBECTX="gke_worldpeace-production_us-central1-a_wandering-frog" make deploy
+      KUBECTX="gke_worldpeaceio-production_us-central1-a_wandering-frog" make deploy
 
 # Options
 timeout: 300s
