@@ -13,6 +13,7 @@ steps:
 
 # Deploy to k8s cluster
 - name: 'docker-make'
+  entrypoint: "bash"
   args:
     - '-c'
     - |
