@@ -1,8 +1,8 @@
 IMAGE := wordpress-integration-services
 REGISTRY := us.gcr.io/worldpeace-container-registry/
-INITIAL_TAG := $(shell date | sha256sum | head -c 8)
+INITIAL_TAG := $(shell date | shasum -a 256 | head -c 8)
 FINAL_TAG = $(shell docker images $(IMAGE):$(INITIAL_TAG) --format '{{.ID}}')
-KUBE_CTX ?= docker-for-desktop
+KUBECTX ?= docker-for-desktop
 
 .PHONY: all
 all: kustomization.yaml
@@ -36,12 +36,12 @@ docker_push: artifacts/image.txt
 
 .PHONY: deploy
 deploy: kustomization.yaml
-	kubectx $(KUBECTX)
+	kubectl config use-context $(KUBECTX)
 	kubectl apply -k .
 
 .PHONY: tear_down
 tear_down: kustomization.yaml
-	kubectx $(KUBECTX)
+	kubectl config use-context $(KUBECTX)
 	kubectl delete -k .
 
 .PHONY: clean
