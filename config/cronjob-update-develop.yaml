@@ -13,7 +13,7 @@ spec:
         spec:
           containers:
           - name: wordpress-integration-services
-            image: us.gcr.io/api-in-k8s/wordpress-integration-services
+            image: us.gcr.io/worldpeace-container-registry/wordpress-integration-services
             command: ["python"]
             args: ["/app/update_develop/main.py"]
             volumeMounts:
