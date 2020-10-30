@@ -6,7 +6,7 @@ metadata:
     app: wordpress-integration-services
 spec:
   schedule: "*/30 * * * *"
-  concurrencyPolicy: Replace
+  concurrencyPolicy: Forbid
   jobTemplate:
     spec:
       template:
@@ -24,4 +24,4 @@ spec:
           - name: secrets
             secret:
               secretName: github-app-key-pem
-          restartPolicy: OnFailure
+          restartPolicy: Never
