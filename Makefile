@@ -2,7 +2,7 @@ IMAGE := wordpress-integration-services
 REGISTRY := us.gcr.io/worldpeace-container-registry/
 INITIAL_TAG := $(shell date | shasum -a 256 | head -c 8)
 FINAL_TAG = $(shell docker images $(IMAGE):$(INITIAL_TAG) --format '{{.ID}}')
-KUBECTX ?= docker-for-desktop
+KUBECTX ?= docker-desktop
 
 .PHONY: all
 all: kustomization.yaml
