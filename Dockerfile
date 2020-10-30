@@ -20,4 +20,5 @@ RUN set -xe; \
     python3 -m unittest discover /app/update_develop; \
 	python3 -m unittest discover /app/merge_master
 
-WORKDIR /workspace
+WORKDIR /app
+CMD [ "python" ]

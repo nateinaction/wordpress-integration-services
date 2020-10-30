@@ -14,8 +14,7 @@ spec:
           containers:
           - name: wordpress-integration-services
             image: us.gcr.io/worldpeace-container-registry/wordpress-integration-services
-            command: ["python"]
-            args: ["/app/merge_master/main.py"]
+            args: ["merge_master/main.py"]
             volumeMounts:
             - name: "secrets"
               mountPath: "/secrets"
